@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+  xsi:schemaLocation="http://www.springframework.org/schema/jdbc 
+    http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+    http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="org.h2.tools.Server" class="org.h2.tools.Server" lazy-init="false"
+    factory-method="createTcpServer" init-method="start" destroy-method="stop">
+    <constructor-arg>
+      <array>
+        <value>-tcp</value>
+        <value>-tcpAllowOthers</value>
+        <value>-tcpPort</value>
+        <value>8043</value>
+        <value>-properties</value>
+        <value>"~/partition-test"</value>
+      </array>
+    </constructor-arg>
+  </bean>
+  
+  <jdbc:initialize-database data-source="dataSource">
+    <jdbc:script location="classpath:h2-purge.sql"/>
+  </jdbc:initialize-database>
+  
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+      <property name="driverClassName" value="org.h2.Driver"/>
+      <property name="url" value="jdbc:h2:tcp://localhost:8043/~/partition-test"/>
+      <property name="username" value="sa"/>
+      <property name="password" value=""/>        
+  </bean>   
+</beans>

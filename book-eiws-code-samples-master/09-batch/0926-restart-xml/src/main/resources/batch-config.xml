@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns="http://www.springframework.org/schema/batch"
+  xsi:schemaLocation="http://www.springframework.org/schema/batch 
+  http://www.springframework.org/schema/batch/spring-batch.xsd
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <step id="boilWaterStepParent">
+    <tasklet ref="boilWater" allow-start-if-complete="true"/>
+  </step>
+  <step id="addTeaStepParent">
+    <tasklet ref="addTea" allow-start-if-complete="true" start-limit="2"/>
+  </step>
+  <step id="addWaterStepParent">
+    <tasklet ref="addWater"/>
+  </step>
+  
+  <job id="prepareTeaJob">
+    <step id="boilWaterStep" parent="boilWaterStepParent" next="addTeaStep"/>
+    <step id="addTeaStep" parent="addTeaStepParent" next="addWaterStep"/>
+    <step id="addWaterStep" parent="addWaterStepParent"/>
+  </job>
+  
+  <job id="prepareTeaJobNotRestartable" restartable="false">
+    <step id="boilWaterStepNR" parent="boilWaterStepParent" next="addTeaStepNR"/>
+    <step id="addTeaStepNR" parent="addTeaStepParent" next="addWaterStepNR"/>
+    <step id="addWaterStepNR" parent="addWaterStepParent"/>
+  </job>
+</beans:beans>

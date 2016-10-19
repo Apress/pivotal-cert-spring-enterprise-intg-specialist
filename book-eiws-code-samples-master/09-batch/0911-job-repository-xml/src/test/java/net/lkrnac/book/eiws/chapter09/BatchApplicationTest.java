@@ -1,0 +1,39 @@
+package net.lkrnac.book.eiws.chapter09;
+
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+@ContextConfiguration(classes = BatchApplication.class)
+public class BatchApplicationTest extends AbstractTestNGSpringContextTests {
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private JobLauncher jobLauncher;
+
+  @Autowired
+  private Job job;
+
+  @Test(timeOut = 5000)
+  public void testBatch() throws Exception {
+    // GIVEN - Spring configuration
+
+    // WHEN - Spring Batch job is started automatically
+    JobExecution execution = jobLauncher.run(job, new JobParameters());
+
+    // THEN
+    Assert.assertEquals(execution.getStatus(), BatchStatus.COMPLETED);
+    long stepExecutionCount = jdbcTemplate
+        .queryForObject("select count(*) from BATCH_STEP_EXECUTION", Long.class);
+    Assert.assertEquals(stepExecutionCount, 3);
+  }
+}

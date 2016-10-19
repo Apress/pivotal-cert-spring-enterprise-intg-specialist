@@ -1,0 +1,1 @@
+java -cp "target/dependency-jars/*:target/0907-job-launcher-javaconfig-0.0.2-SNAPSHOT.jar" org.springframework.batch.core.launch.support.CommandLineJobRunner net.lkrnac.book.eiws.chapter09.BatchApplication prepareTeaJob

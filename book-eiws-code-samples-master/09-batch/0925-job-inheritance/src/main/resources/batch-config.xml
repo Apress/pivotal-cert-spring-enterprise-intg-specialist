@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns="http://www.springframework.org/schema/batch"
+  xsi:schemaLocation="http://www.springframework.org/schema/batch 
+  http://www.springframework.org/schema/batch/spring-batch.xsd
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <step id="boilWaterStep" abstract="true">
+    <tasklet ref="boilWater" />
+  </step>
+  <step id="addTeaStep" abstract="true">
+    <tasklet ref="addTea" />
+  </step>
+  <step id="addWaterStep" abstract="true">
+    <tasklet ref="addWater" />
+  </step>
+
+  <job id="prepareTeaJob" abstract="true">
+    <listeners>
+      <listener ref="teaJobListener"/>
+    </listeners>
+  </job>
+
+  <job id="prepareMildTeaJob" parent="prepareTeaJob">
+    <step id="boilWaterForMildTea" parent="boilWaterStep" next="addTeaForMildTea" />
+    <step id="addTeaForMildTea" parent="addTeaStep" next="addWaterForMildTea"/>
+    <step id="addWaterForMildTea" parent="addWaterStep"/>
+  </job>
+  
+  <job id="prepareStrongTeaJob" parent="prepareTeaJob">
+    <step id="boilWaterForStrongTea" parent="boilWaterStep" next="addTea1ForStrongTea" />
+    <step id="addTea1ForStrongTea" parent="addTeaStep" next="addTea2ForStrongTea"/>
+    <step id="addTea2ForStrongTea" parent="addTeaStep" next="addWaterForStrongTea"/>
+    <step id="addWaterForStrongTea" parent="addWaterStep"/>
+  </job>
+</beans:beans>

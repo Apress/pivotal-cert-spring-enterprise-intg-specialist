@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:batch="http://www.springframework.org/schema/batch"
+  xmlns:int="http://www.springframework.org/schema/integration"
+  xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+  xsi:schemaLocation="http://www.springframework.org/schema/batch 
+    http://www.springframework.org/schema/batch/spring-batch.xsd
+    http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/integration/jms 
+    http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+    http://www.springframework.org/schema/integration 
+    http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+  <import resource="classpath:jms-config.xml" />
+
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+      <property name="driverClassName" value="org.h2.Driver"/>
+      <property name="url" value="jdbc:h2:tcp://localhost:8043/~/partition-test"/>
+      <property name="username" value="sa"/>
+      <property name="password" value=""/>        
+  </bean>  
+
+  <bean id="stepExecutionRequestHandler"
+    class="org.springframework.batch.integration.partition.StepExecutionRequestHandler">
+    <property name="jobExplorer" ref="jobExplorer" />
+    <property name="stepLocator" ref="stepLocator" />
+  </bean>
+
+  <bean id="stepLocator"
+    class="org.springframework.batch.integration.partition.BeanFactoryStepLocator" />
+
+  <batch:step id="simpleRecordsStep">
+    <batch:tasklet allow-start-if-complete="true">
+      <batch:chunk reader="partitionedRecordReader" writer="simpleRecordWriter"
+        processor="simpleRecordProcessor" commit-interval="4"/>
+    </batch:tasklet>
+  </batch:step>
+
+  <int:channel id="inSlaveChannel" />
+  <int-jms:message-driven-channel-adapter
+    id="inSlaveAdapter" destination="masterCommands" channel="inSlaveChannel" />
+
+  <int:service-activator ref="stepExecutionRequestHandler"
+    input-channel="inSlaveChannel" output-channel="outSlaveChannel" />
+    
+  <int:channel id="outSlaveChannel" />
+  <int-jms:outbound-channel-adapter id="outSlaveAdapter"
+    destination="slaveResponses" channel="outSlaveChannel" />
+</beans>

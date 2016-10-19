@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:ws="http://www.springframework.org/schema/web-services"
+  xsi:schemaLocation="http://www.springframework.org/schema/web-services 
+    http://www.springframework.org/schema/web-services/web-services.xsd
+		http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <context:component-scan base-package="net.lkrnac.book.eiws.chapter03.ws.xmlconfig.server" />
+
+  <ws:annotation-driven />
+
+  <ws:static-wsdl id="userDetails" location="classpath:userDetailsSchema.wsdl"/>
+
+<!--   <ws:dynamic-wsdl id="userDetails" portTypeName="UserDetailsPort" -->
+<!--     locationUri="/" -->
+<!--     targetNamespace="http://localhost:10301/0301-ws-xmlconfig-service"> -->
+<!--     <ws:xsd location="classpath:userDetailsSchema.xsd" /> -->
+<!--   </ws:dynamic-wsdl> -->
+  
+  <ws:interceptors>
+    <ref bean="globalInterceptor"/>
+    <ws:payloadRoot namespaceUri="http://localhost:10301/0301-ws-xmlconfig-service" localPart="UserRequest">
+      <bean class="net.lkrnac.book.eiws.chapter03.ws.xmlconfig.server.UserInterceptor"/>
+      <ref bean="loggingInterceptor"/>
+    </ws:payloadRoot>
+    <bean class="org.springframework.ws.soap.server.endpoint.interceptor.SoapEnvelopeLoggingInterceptor"/>
+    <bean class="org.springframework.ws.soap.server.endpoint.interceptor.PayloadValidatingInterceptor">
+      <property name="schema" value="classpath:userDetailsSchema.xsd"/>
+      <property name="validateRequest" value="true"/>
+      <property name="validateResponse" value="true"/>
+    </bean>
+  </ws:interceptors>
+  
+  <bean id="loggingInterceptor" class="org.springframework.ws.server.endpoint.interceptor.PayloadLoggingInterceptor"/>
+  <bean id="globalInterceptor" 
+    class="net.lkrnac.book.eiws.chapter03.ws.xmlconfig.server.GlobalInterceptor" />
+</beans>

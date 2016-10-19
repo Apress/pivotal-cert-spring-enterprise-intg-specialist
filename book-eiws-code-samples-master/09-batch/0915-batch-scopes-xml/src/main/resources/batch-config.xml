@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns="http://www.springframework.org/schema/batch"
+  xsi:schemaLocation="http://www.springframework.org/schema/batch 
+  http://www.springframework.org/schema/batch/spring-batch.xsd
+  http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <job id="combinedJob">
+    <step id="simpleRecordsStep" next="boilWaterStep">
+      <tasklet>
+        <chunk reader="statefulRecordReader" writer="statefulRecordWriter"
+          processor="simpleRecordProcessor" commit-interval="4" />
+      </tasklet>
+    </step>
+
+    <step id="boilWaterStep" next="addTeaStep">
+      <tasklet ref="boilWaterStateful" />
+    </step>
+    <step id="addTeaStep" next="addWaterStep">
+      <tasklet ref="addTea" />
+    </step>
+    <step id="addWaterStep">
+      <tasklet ref="addWater" />
+    </step>
+  </job> 
+</beans:beans>
